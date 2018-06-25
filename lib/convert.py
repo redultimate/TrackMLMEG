@@ -1,7 +1,8 @@
+from calculator import CalculatorCells as CalCells
+
 class Converter:
 	def particles2truth(particles, truth):
 		particle_id = particles.particle_id.values
-		mom = [0 for i in range(len(truth.hit_id.values))]
 		vx = [0 for i in range(len(truth.hit_id.values))]
 		vy = [0 for i in range(len(truth.hit_id.values))]
 		vz = [0 for i in range(len(truth.hit_id.values))]
@@ -57,4 +58,11 @@ class Converter:
 		hits['weight'] = truth.weight.values
     
 		return
+
+	def cells2hits(cells,hits):
+		total_edep = CalCells.sum_edep(cells)
+		hits['total_edep'] = total_edep
+
+		return
+
 		
