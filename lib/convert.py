@@ -1,4 +1,4 @@
-from calculator import CalculatorCells as CalCells
+from calculate import CalculatorCells as CalCells
 
 class Converter:
 	def particles2truth(particles, truth):
