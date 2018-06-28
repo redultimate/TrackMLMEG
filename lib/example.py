@@ -1,6 +1,6 @@
 class Greeting:
-	def Hello(name="world"):
+	def say_hello(name="world"):
 		print("Hello, " + name + "!")
 
-	def Konnichiwa(name="sekai"):
+	def say_Konnichiwa(name="sekai"):
 		print("Konnichiwa, " + name + "!")

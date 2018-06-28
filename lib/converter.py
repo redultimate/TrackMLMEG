@@ -1,7 +1,7 @@
-from calculate import CalculatorCells as CalCells
+from calculator import CellCalculator as CellCal
 
 class Converter:
-	def particles2truth(self, particles, truth):
+	def convert_particles2truth(self, particles, truth):
 		assembly = truth
 
 		particle_id = particles.particle_id.values
@@ -49,7 +49,7 @@ class Converter:
         
 		return assembly
 
-	def truth2hits(self,truth,hits):
+	def convert_truth2hits(self,truth,hits):
 		assembly = hits
 		keys = truth.keys()
 		for i in range(len(keys)):
@@ -57,16 +57,16 @@ class Converter:
     
 		return assembly
 
-	def cells2hits(self,cells,hits):
+	def convert_cells2hits(self,cells,hits):
 		assembly = hits
-		total_edep = CalCells.sum_edep(cells)
-		assembly['total_edep'] = total_edep
+		hit_edep = CellCal.sum_edep(cells)
+		assembly['hit_edep'] = hit_edep
 
 		return assembly
 
-	def AssembleAll(self,hits,cells,particles,truth):
-		assembly = self.cells2hits(cells,hits)
-		assembly2 = self.particles2truth(particles,truth)
+	def assemble_all(self,hits,cells,particles,truth):
+		assembly = self.convert_cells2hits(cells,hits)
+		assembly2 = self.convert_particles2truth(particles,truth)
 
 		keys = assembly2.keys();
 		for i in range(len(keys)):
