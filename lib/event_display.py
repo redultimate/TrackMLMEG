@@ -59,3 +59,27 @@ class Plots3D:
         ax.set_ylabel('X (millimeters)')
         ax.set_zlabel('Y (millimeters)')
         plt.show()
+	
+    def get_track(self, assembly, particles_sample):
+        fig = plt.figure(figsize=(12, 12))
+        ax = fig.add_subplot(111, projection='3d')
+
+        particle_id = particles_sample.particle_id.values
+
+        for i in range(len(particle_id)):
+            hit_id = assembly.hit_id[assembly.particle_id == particle_id[i]]
+            x = assembly.x[assembly.particle_id == particle_id[i]]
+            y = assembly.y[assembly.particle_id == particle_id[i]]
+            z = assembly.z[assembly.particle_id == particle_id[i]]
+        
+            ax.scatter(z, x, y, s=5, label='particle {}'.format(particle_id[i]), alpha=1)
+    
+            print('particle ', particle_id[i], ' nhits = ', particles_sample.nhits.values[i])
+ 
+    
+        ax.set_title('track')
+        ax.set_xlabel('z (millimeters)')
+        ax.set_ylabel('x (millimeters)')
+        ax.set_zlabel('y (millimeters)')
+        plt.show()
+

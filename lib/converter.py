@@ -58,8 +58,9 @@ class Converter:
 		return assembly
 
 	def convert_cells2hits(self,cells,hits):
+		cellcal = CellCal()
 		assembly = hits
-		hit_edep = CellCal.sum_edep(cells)
+		hit_edep = cellcal.get_hit_edep(cells)
 		assembly['hit_edep'] = hit_edep
 
 		return assembly
