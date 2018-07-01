@@ -39,9 +39,9 @@ class MCCalculator:
       return hits
    #_____________________________________________________________
    def calc_cylindrical(self, hits):
-      hits['hit_vr'] = np.sqrt(hits['vx'] **2+ hits['vy']**2)
-      hits['hit_vtheta'] = np.degrees(np.arctan2(hits['vx'], hits['vy']))
-      hits['hit_vphi'] = np.degrees(np.arctan2(hits['hit_vr'], hits['vz']))
+      hits['track_vr'] = np.sqrt(hits['vx'] **2+ hits['vy']**2)
+      hits['track_vtheta'] = np.degrees(np.arctan2(hits['vx'], hits['vy']))
+      hits['track_vphi'] = np.degrees(np.arctan2(hits['track_vr'], hits['vz']))
       return hits
    #_____________________________________________________________
    def calc_trackweight(self, hits):
