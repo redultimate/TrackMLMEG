@@ -58,7 +58,7 @@ def get_uDp(x,y):
     else:
         if x[1] < -rd*math.sin(phi):
             ATan1 += math.pi
-        elif ATan < 0:
+        elif ATan1 < 0:
             ATan1 += 2*math.sin(phi)
             ATan0 += 2*math.sin(phi)
 
