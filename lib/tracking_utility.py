@@ -24,7 +24,7 @@ def fit_circle(x,y):
     return (cxe,cye,re)
 
 def get_1uDp(x,y):
-    #assume x = (x1, x2, x3) and y = (y1, y2, y3)
+    #assume x = array([x1, x2, x3]) and y = array([y1, y2, y3]). return (u, D, phi)
     if(len(x)!=3 or len(y)!=3):
         return (0,0,0)
     r2 = x*x + y*y
@@ -85,7 +85,8 @@ def get_1uDp(x,y):
     return (u, D, phi)
 
 def get_uDp(x):
-    #assume x = [{(x1,y1),(x2,y2),(x3,y3)},{},... ]
+    #assume x = array([[[x1,y1],[x2,y2],[x3,y3]],[],...])
+    #return array([[u,v,w],[],...])
     if (x.shape[1] !=3) or (x.shape[2] != 2):
         return np.zeros(3)
     r2 = (x*x).sum(axis=2)
