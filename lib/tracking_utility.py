@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import detector as det
 
 def fit_circle(x,y):
     sumx = sum(x)
@@ -152,13 +153,171 @@ def get_uDp(x):
     
     u *= q
     D *= q
-    #if q > 0:
-    #    if phi > math.pi:
+
     condition = [(q>0) & (phi>math.pi), (q>0) & ~(phi>math.pi)]
     phi[condition[0]] -= math.pi
-    #    else:
     phi[condition[1]] += math.pi
     #eta *= q
 
     return (u, D, phi)
+
+def get_jacobian(state,module_trans):
+    ndata = state.shape[0]
+    ndim_state = state.shape[1]
+    ndim_obsrv = 1
+    
+    cx = module_trans["cx"]
+    cy = module_trans["cy"]
+    cos_theta = module_trans["cos_theta"]
+    sin_theta = module_trans["sin_theta"]
+
+    #define parameters
+    q = np.ones(ndata)
+    q[state[:,0]<0] = -1
+    phi = state[:,2]
+    condition = [(q>0) & (phi>math.pi), (q>0) & ~(phi>math.pi)]
+    phi[condition[0]] -= math.pi
+    phi[condition[1]] += math.pi
+    cos_phi = np.cos(phi)
+    sin_phi = np.sin(phi)
+    ax = -q * (1./state[:,0] - state[:,1])*sin_phi
+    ay = q * (1./state[:,0] - state[:,1])*cos_phi
+    root = 1./state[:,0]/state[:,0] - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
+    root[root>0] = np.sqrt(root[root>0])
+    root[root<0] = 1.e-9
+    cos_phi[phi>math.pi] = np.cos(phi[phi>math.pi]-math.pi)
+    sin_phi[phi>math.pi] = np.sin(phi[phi>math.pi]-math.pi)
+
+    #calculate jacobian
+    jacobian = np.zeros((ndata,ndim_obsrv,ndim_state))
+    jacobian[:,0,0] = (sin_phi*cos_theta - cos_phi*sin_theta)/state[:,0]/state[:,0]
+    tmp = (sin_phi*sin_theta - cos_phi*sin_theta)*((cx-ax)*sin_theta - (cy-ay)*cos_theta) - 1./state[:,0]
+    tmp /= root/state[:,0]/state[:,0]
+    jacobian[:,0,0][q<0] -= tmp[q<0]
+    jacobian[:,0,0][q>0] += tmp[q>0]
+
+    jacobian[:,0,1] = sin_phi*cos_theta - cos_phi*sin_theta
+    tmp = (sin_phi*sin_theta + cos_phi*cos_theta)*((cx-ax)*sin_theta - (cy-ay)*cos_theta)/root 
+    jacobian[:,0,1][q<0] -= tmp[q<0]
+    jacobian[:,0,1][q>0] += tmp[q>0]
+
+    jacobian[:,0,2] = - (1./state[:,0] - state[:,1])*(cos_phi*cos_theta + sin_phi*sin_theta)
+    tmp = (1./state[:,0] - state[:,1])*(cos_phi*sin_theta - sin_phi*cos_theta)*((cx-ax)*sin_theta - (cy-ay)*cos_theta)/root 
+    jacobian[:,0,2][q<0] += tmp[q<0]
+    jacobian[:,0,2][q>0] -= tmp[q>0]
+
+    #not use z info
+    #jacobian[:,0,3] = 0
+    #jacobian[:,0,4] = 0
+
+    return jacobian
+
+def get_predict_obsrv(state,module_trans):
+    ndata = state.shape[0]
+    ndim_state = state.shape[1]
+    ndim_obsrv = 1
+    
+    cx = module_trans["cx"]
+    cy = module_trans["cy"]
+    cos_theta = module_trans["cos_theta"]
+    sin_theta = module_trans["sin_theta"]
+
+    #define parameters
+    q = np.ones(ndata)
+    q[state[:,0]<0] = -1
+    phi = state[:,2]
+    condition = [(q>0) & (phi>math.pi), (q>0) & ~(phi>math.pi)]
+    phi[condition[0]] -= math.pi
+    phi[condition[1]] += math.pi
+    cos_phi = np.cos(phi)
+    sin_phi = np.sin(phi)
+    ax = -q * (1./state[:,0] - state[:,1])*sin_phi
+    ay = q * (1./state[:,0] - state[:,1])*cos_phi
+    root = 1./state[:,0]/state[:,0] - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
+    root[root>0] = np.sqrt(root[root>0])
+    root[root<0] = 1.e-9
+    cos_phi[phi>math.pi] = np.cos(phi[phi>math.pi]-math.pi)
+    sin_phi[phi>math.pi] = np.sin(phi[phi>math.pi]-math.pi)
+
+    #calculate hit position in local
+    predict_obsrv = np.zeros((ndata,ndim_obsrv))
+    predict_obsrv[:,0] = -(cx-ax)*cos_theta - (cy-ay)*sin_theta
+    predict_obsrv[:,0][q<0] += root[q<0]
+    predict_obsrv[:,0][q>0] -= root[q>0]
+
+    return predict_obsrv
+
+class Tracking:
+#    def __int__(self):
+
+    def get_track_id(self):
+        return self.track_id
+
+    def get_hit_id(self):
+        return self.hit_id
+
+    def get_state(self):
+        return self.state
+
+    def get_state_cov(self):
+        return self.state_cov
+  
+    def get_sum_chi2(self):
+        return self.sum_chi2
+
+    def set_track_id(self,track_id):
+        self.track_id = track_id
+   
+    def set_hit_id(self,hit_id):
+        self.hit_id = hit_id
+   
+    def set_state(self,state):
+        self.state = state
+
+    def set_state_cov(self,state_cov):
+        self.state_cov = state_cov
+
+    def set_sum_chi2(self,sum_chi2):
+        self.sum_chi2 = sum_chi2
+
+    def add_track_id(self,track_id):
+        np.append(self.track_id,track_id)
+
+    def add_hit_id(self,hit_id):
+        np.append(self.hit_id,hit_id)
+
+    def add_state(self,state):
+        np.append(self.state,state)
+
+    def add_state_cov(self,state_cov):
+        np.append(self.state_cov,state_cov)
+
+
+    def add_sum_chi2(self,sum_chi2):
+        np.append(self.sum_chi2,sum_chi2)
+
+    def cut_by_chi2(self,limit):
+        cut = self.sum_chi2 > limit
+        track_id = np.zeros(self.track_id.shape[0])
+        hit_id = np.zeros((self.hit_id.shape[0],self.hit_id.shape[1]))
+        state = np.zeros((self.state.shape[0],self.state.shape[1]))
+        state_cov = np.zeros((self.state_cov.shape[0],self.state_cov.shape[1],self.state_cov.shape[2]))
+        sum_chi2 = np.zeros(self.sum_chi2.shape[0])
+        n = 0
+        for i in range(len(cut)):
+            if cut[i]:
+                continue
+            track_id[n] = self.track_id[i]
+            hit_id[n] = self.hit_id[i]
+            state[n] = self.state[i]
+            state_cov[n] = self.state_cov[i]
+            sum_chi2[n] = self.sum_chi2[i]
+            n += 1
+        self.track_id = track_id[0:n]
+        self.hit_id = hit_id[0:n,:]
+        self.state = state[0:n,:]
+        self.state_cov = state_cov[0:n,:,:]
+        self.sum_chi2 = sum_chi2[0:n]
+    
+        print("removed ", len(cut) - n , "track candidates")
 
