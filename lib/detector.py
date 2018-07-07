@@ -72,7 +72,7 @@ class Detector:
             #cz = theModule.cz.values[0]#not use z info
             #module's slope
             cos_theta[i] = theModule.rot_xu.values[0]
-            sin_theta[i] = theModule.rot_xv.values[0]
+            sin_theta[i] = theModule.rot_xw.values[0]
 
         module_trans = {"cx":cx,"cy":cy,"cos_theta":cos_theta,"sin_theta":sin_theta}
 

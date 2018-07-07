@@ -9,14 +9,14 @@ def fit_circle(x,y):
     sumy2 = sum([iy ** 2 for iy in y])
     sumxy = sum([ix * iy for (ix,iy) in zip(x,y)])
 
-    F = np.array([sumx2,sumxy,sumx],
-                 [sumxy,sumy2,sumy],
-                 [sumx, sumy, len(x)])
+    F = np.array([[sumx2,sumxy,sumx],
+                  [sumxy,sumy2,sumy],
+                  [sumx, sumy, len(x)]])
     G = np.array([[-sum([ix ** 3 + ix*iy **2 for (ix,iy) in zip(x,y)])],
                   [-sum([ix **2 *iy + iy **3 for (ix,iy) in zip(x,y)])],
                   [-sum([ix ** 2 + iy **2 for (ix,iy) in zip(x,y)])]])
 
-    T = np.linag.inv(F).dot(G)
+    T = np.linalg.inv(F).dot(G)
 
     cxe = float(T[0]/-2)
     cye = float(T[1]/-2)
@@ -170,6 +170,8 @@ def get_jacobian(state,module_trans):
     cy = module_trans["cy"]
     cos_theta = module_trans["cos_theta"]
     sin_theta = module_trans["sin_theta"]
+    #protect from 0 divide
+    state[:,0][state[:,0]==0] = 1e-12
 
     #define parameters
     q = np.ones(ndata)
@@ -221,7 +223,8 @@ def get_predict_obsrv(state,module_trans):
     cy = module_trans["cy"]
     cos_theta = module_trans["cos_theta"]
     sin_theta = module_trans["sin_theta"]
-
+    #protect from 0 divide
+    state[:,0][state[:,0]==0] = 1e-12
     #define parameters
     q = np.ones(ndata)
     q[state[:,0]<0] = -1
@@ -233,17 +236,22 @@ def get_predict_obsrv(state,module_trans):
     sin_phi = np.sin(phi)
     ax = -q * (1./state[:,0] - state[:,1])*sin_phi
     ay = q * (1./state[:,0] - state[:,1])*cos_phi
-    root = 1./state[:,0]/state[:,0] - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
+    #print("cos ",cos_phi, "sin ",sin_phi, "ax ",ax,"ay ",ay)
+    root = 1./state[:,0]**2 - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
     root[root>0] = np.sqrt(root[root>0])
     root[root<0] = 1.e-9
-    cos_phi[phi>math.pi] = np.cos(phi[phi>math.pi]-math.pi)
-    sin_phi[phi>math.pi] = np.sin(phi[phi>math.pi]-math.pi)
+    #cos_phi[phi>math.pi] = np.cos(phi[phi>math.pi]-math.pi)
+    #sin_phi[phi>math.pi] = np.sin(phi[phi>math.pi]-math.pi)
 
     #calculate hit position in local
+    #print("root ",root)
     predict_obsrv = np.zeros((ndata,ndim_obsrv))
     predict_obsrv[:,0] = -(cx-ax)*cos_theta - (cy-ay)*sin_theta
-    predict_obsrv[:,0][q<0] += root[q<0]
-    predict_obsrv[:,0][q>0] -= root[q>0]
+    #print("cos ",cos_theta, "sin ",sin_theta, "cx ",cx,"cy ",cy)
+    #print("obsrv ", predict_obsrv[:,0])
+    predict_obsrv[:,0][q<0] -= root[q<0]
+    predict_obsrv[:,0][q>0] += root[q>0]
+    #+-??
 
     return predict_obsrv
 
