@@ -1,4 +1,5 @@
 import numpy as np
+import pickle as pkl
 
 width = 15
 mid_lookup_17_4_to_17_2 = []
@@ -10,7 +11,7 @@ modules_13_8 = 2142
 def func_data(x, y, slope, offset):
     return abs(slope * x + offset - y)
 
-def make_module_tables(vid):
+def make_module_tables(vid, path_to_output):
     # currently only mid = 17 works
     if vid == 17:
         for i in range(modules_17_4):
@@ -45,8 +46,12 @@ def make_module_tables(vid):
                     temp.append(y)
             mid_lookup_17_2_to_13_8.append(temp)
 
-        return mid_lookup_17_4_to_17_2, mid_lookup_17_2_to_13_8
+        # return mid_lookup_17_4_to_17_2, mid_lookup_17_2_to_13_8
+        f = open('%s/mid_lookup_17_4_to_17_2.pkl' % path_to_output, 'wb')
+        pkl.dump(mid_lookup_17_4_to_17_2, f)
+        f = open('%s/mid_lookup_17_2_to_13_8.pkl' % path_to_output, 'wb')
+        pkl.dump(mid_lookup_17_2_to_13_8, f)
 
     else:
         print('warning!! choose volume id from (17). Othre modules will be implemented.')
-        return 0, 0
+        # return 0, 0
