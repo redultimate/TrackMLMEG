@@ -76,7 +76,7 @@ def get_1uDp(x,y):
     
     u *= q
     D *= q
-    if q > 0:
+    if q < 0:
         if phi > math.pi:
             phi -= math.pi
         else:
@@ -154,7 +154,7 @@ def get_uDp(x):
     u *= q
     D *= q
 
-    condition = [(q>0) & (phi>math.pi), (q>0) & ~(phi>math.pi)]
+    condition = [(q<0) & (phi>math.pi), (q<0) & ~(phi>math.pi)]
     phi[condition[0]] -= math.pi
     phi[condition[1]] += math.pi
     #eta *= q
@@ -171,13 +171,13 @@ def get_jacobian(state,module_trans):
     cos_theta = module_trans["cos_theta"]
     sin_theta = module_trans["sin_theta"]
     #protect from 0 divide
-    state[:,0][state[:,0]==0] = 1e-12
+    state[:,0][state[:,0]==0] = 1e-20
 
     #define parameters
     q = np.ones(ndata)
     q[state[:,0]<0] = -1
     phi = state[:,2]
-    condition = [(q>0) & (phi>math.pi), (q>0) & ~(phi>math.pi)]
+    condition = [(q<0) & (phi>math.pi), (q<0) & ~(phi>math.pi)]
     phi[condition[0]] -= math.pi
     phi[condition[1]] += math.pi
     cos_phi = np.cos(phi)
@@ -186,27 +186,37 @@ def get_jacobian(state,module_trans):
     ay = q * (1./state[:,0] - state[:,1])*cos_phi
     root = 1./state[:,0]/state[:,0] - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
     root[root>0] = np.sqrt(root[root>0])
-    root[root<0] = 1.e-9
+    root[root<0] = 1.e-20
     cos_phi[phi>math.pi] = np.cos(phi[phi>math.pi]-math.pi)
     sin_phi[phi>math.pi] = np.sin(phi[phi>math.pi]-math.pi)
 
+    #print(q)
     #calculate jacobian
     jacobian = np.zeros((ndata,ndim_obsrv,ndim_state))
     jacobian[:,0,0] = (sin_phi*cos_theta - cos_phi*sin_theta)/state[:,0]/state[:,0]
+    #print(jacobian[:,0,0])
     tmp = (sin_phi*sin_theta - cos_phi*sin_theta)*((cx-ax)*sin_theta - (cy-ay)*cos_theta) - 1./state[:,0]
-    tmp /= root/state[:,0]/state[:,0]
+    tmp /= root*state[:,0]*state[:,0]
+    #print(tmp)
     jacobian[:,0,0][q<0] -= tmp[q<0]
     jacobian[:,0,0][q>0] += tmp[q>0]
+    #print(jacobian[:,0,0])
 
     jacobian[:,0,1] = sin_phi*cos_theta - cos_phi*sin_theta
+    #print(jacobian[:,0,1])
     tmp = (sin_phi*sin_theta + cos_phi*cos_theta)*((cx-ax)*sin_theta - (cy-ay)*cos_theta)/root 
+    #print(tmp)
     jacobian[:,0,1][q<0] -= tmp[q<0]
     jacobian[:,0,1][q>0] += tmp[q>0]
+    #print(jacobian[:,0,1])
 
     jacobian[:,0,2] = - (1./state[:,0] - state[:,1])*(cos_phi*cos_theta + sin_phi*sin_theta)
+    #print(jacobian[:,0,2])
     tmp = (1./state[:,0] - state[:,1])*(cos_phi*sin_theta - sin_phi*cos_theta)*((cx-ax)*sin_theta - (cy-ay)*cos_theta)/root 
+    #print(tmp)
     jacobian[:,0,2][q<0] += tmp[q<0]
     jacobian[:,0,2][q>0] -= tmp[q>0]
+    #print(jacobian[:,0,2])
 
     #not use z info
     #jacobian[:,0,3] = 0
@@ -224,12 +234,12 @@ def get_predict_obsrv(state,module_trans):
     cos_theta = module_trans["cos_theta"]
     sin_theta = module_trans["sin_theta"]
     #protect from 0 divide
-    state[:,0][state[:,0]==0] = 1e-12
+    state[:,0][state[:,0]==0] = 1e-20
     #define parameters
     q = np.ones(ndata)
     q[state[:,0]<0] = -1
     phi = state[:,2]
-    condition = [(q>0) & (phi>math.pi), (q>0) & ~(phi>math.pi)]
+    condition = [(q<0) & (phi>math.pi), (q<0) & ~(phi>math.pi)]
     phi[condition[0]] -= math.pi
     phi[condition[1]] += math.pi
     cos_phi = np.cos(phi)
@@ -237,9 +247,9 @@ def get_predict_obsrv(state,module_trans):
     ax = -q * (1./state[:,0] - state[:,1])*sin_phi
     ay = q * (1./state[:,0] - state[:,1])*cos_phi
     #print("cos ",cos_phi, "sin ",sin_phi, "ax ",ax,"ay ",ay)
-    root = 1./state[:,0]**2 - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
+    root = 1./state[:,0]/state[:,0] - ((cx-ax)*sin_theta - (cy-ay)*cos_theta)**2
     root[root>0] = np.sqrt(root[root>0])
-    root[root<0] = 1.e-9
+    root[root<0] = 1.e-20
     #cos_phi[phi>math.pi] = np.cos(phi[phi>math.pi]-math.pi)
     #sin_phi[phi>math.pi] = np.sin(phi[phi>math.pi]-math.pi)
 
@@ -249,9 +259,9 @@ def get_predict_obsrv(state,module_trans):
     predict_obsrv[:,0] = -(cx-ax)*cos_theta - (cy-ay)*sin_theta
     #print("cos ",cos_theta, "sin ",sin_theta, "cx ",cx,"cy ",cy)
     #print("obsrv ", predict_obsrv[:,0])
+    #print(q)
     predict_obsrv[:,0][q<0] -= root[q<0]
     predict_obsrv[:,0][q>0] += root[q>0]
-    #+-??
 
     return predict_obsrv
 
