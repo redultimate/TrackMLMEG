@@ -39,8 +39,8 @@ class KalmanFilter:
         q = np.ones(ndata)
         q[tracks.get_state()[:,0]<0] = -1
         phi = tracks.get_state()[:,2]
-        tracks.get_state()[:,2][(q>0) & (phi<math.pi)] += math.pi
-        tracks.get_state()[:,2][(q>0) & ~(phi<math.pi)] -= math.pi
+        tracks.get_state()[:,2][(q<0) & (phi<math.pi)] += math.pi
+        tracks.get_state()[:,2][(q<0) & ~(phi<math.pi)] -= math.pi
         
         G = np.zeros((ndata,ndim_state,ndim_obsrv))#kalman gain
         #C = np.zeros((ndata,ndim_obsrv,ndim_state))
@@ -76,7 +76,7 @@ class KalmanFilter:
         tracks.set_state_cov(self.predict_cov - GCP)
         #set lower limit for sigma**2
         for i in range(ndim_state):
-            tracks.get_state_cov()[:,i,i][tracks.get_state_cov()[:,i,i]<1.e-9] = 1.e-9
+            tracks.get_state_cov()[:,i,i][tracks.get_state_cov()[:,i,i]<1.e-20] = 1.e-20
 
         #copy state vector
         tracks.set_state(self.predict_state)
@@ -84,15 +84,23 @@ class KalmanFilter:
         tracks.get_state()[:,2][tracks.get_state()[:,2]>math.pi] -= math.pi
         
         chi = obsrv - self.predict_obsrv
+        #print("obsrv : " , obsrv)
+        #print("predict : ", self.predict_obsrv)
+        #print("chi ", chi)
+        #print("before " , tracks.get_state())
         for i in range(ndim_state):
-            tracks.get_state()[:,i] = np.sum(G[:,i] * chi,axis=1)
+            #print(G[:,i,0])
+            #print(G[:,i,0]*chi)
+            tracks.get_state()[:,i] += G[:,i,0] * chi
+            #assume only u observation
+        #print("after " , tracks.get_state())
 
         q = np.ones(ndata)
         q[tracks.get_state()[:,0]<0] = -1
         tracks.get_state()[:,2][phi>math.pi] += math.pi
         phi = tracks.get_state()[:,2]
-        tracks.get_state()[:,2][(q>0) & (phi<math.pi)] += math.pi
-        tracks.get_state()[:,2][(q>0) & ~(phi<math.pi)] -= math.pi
+        tracks.get_state()[:,2][(q<0) & (phi<math.pi)] += math.pi
+        tracks.get_state()[:,2][(q<0) & ~(phi<math.pi)] -= math.pi
 
         self.predict_obsrv = tr_ut.get_predict_obsrv(self.predict_state,module_trans)[:,0]
         chi = obsrv - self.predict_obsrv
