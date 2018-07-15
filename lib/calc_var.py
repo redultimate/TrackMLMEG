@@ -35,6 +35,7 @@ class MCCalculator:
    #_____________________________________________________________
    def calc_all(self, hits):
       hits = self.calc_cylindrical(hits)
+      hits = self.calc_momentum(hits)
       hits = self.calc_trackweight(hits)
       return hits
    #_____________________________________________________________
@@ -43,6 +44,12 @@ class MCCalculator:
       hits['track_vtheta'] = np.degrees(np.arctan2(hits['vx'], hits['vy']))
       hits['track_vphi'] = np.degrees(np.arctan2(hits['track_vr'], hits['vz']))
       return hits
+
+   #_____________________________________________________________
+   def calc_momentum(self, hits):
+      hits['hit_tpt'] = np.sqrt(hits['tpx']**2 + hits['tpy']**2)
+      return hits
+
    #_____________________________________________________________
    def calc_trackweight(self, hits):
       trackweights = hits.groupby('particle_id').sum()['weight']
