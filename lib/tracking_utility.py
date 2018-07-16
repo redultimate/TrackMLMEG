@@ -25,62 +25,62 @@ def fit_circle(x,y):
 
     return (cxe,cye,re)
 
-def get_1uDp(x,y):
+#def get_1uDp(x,y):
     #assume x = array([x1, x2, x3]) and y = array([y1, y2, y3]). return (u, D, phi)
-    if(len(x)!=3 or len(y)!=3):
-        return (0,0,0)
-    r2 = x*x + y*y
-    r2_dif = [r2[1] - r2[2],r2[2] - r2[0], r2[0] - r2[1]]
-    deno = sum(x * r2_dif)
+#    if(len(x)!=3 or len(y)!=3):
+#        return (0,0,0)
+#    r2 = x*x + y*y
+#    r2_dif = [r2[1] - r2[2],r2[2] - r2[0], r2[0] - r2[1]]
+#    deno = sum(x * r2_dif)
     #protect from zero divide
-    if deno < 1.e-20:
-        deno = 1.e-20
-    phi = math.atan(sum(y * r2_dif)/deno)
-    if phi < 0:
-        phi += math.pi
+#    if deno == 0:
+#        deno = 1.e-20
+#    phi = math.atan(sum(y * r2_dif)/deno)
+#    if phi < 0:
+#        phi += math.pi
 
-    rd = -r2_dif[2]/2.0/(math.sin(phi)*(x[0]-x[1])-math.cos(phi)*(y[0]-y[1]))
-    if rd < 0:
-        rd = -rd
-        phi += math.pi
+#    rd = -r2_dif[2]/2.0/(math.sin(phi)*(x[0]-x[1])-math.cos(phi)*(y[0]-y[1]))
+#    if rd < 0:
+#        rd = -rd
+#        phi += math.pi
 
-    rr = r2[0] + 2.0*rd*(math.sin(phi)*x[0]-math.cos(phi)*y[0])+rd**2
-    u = 1.0/math.sqrt(rr)
-    D = math.sqrt(rr) - rd
+#    rr = r2[0] + 2.0*rd*(math.sin(phi)*x[0]-math.cos(phi)*y[0])+rd**2
+#    u = 1.0/math.sqrt(rr)
+#    D = math.sqrt(rr) - rd
 
-    deno = x[0]+rd*math.sin(phi)
+#    deno = x[0]+rd*math.sin(phi)
     #protect from zero divide
-    if deno < 1.e-20:
-        deno = 1.e-20
-    ATan0 = math.atan((y[0]-rd*math.cos(phi))/deno) 
+#    if deno == 0:
+#        deno = 1.e-20
+#    ATan0 = math.atan((y[0]-rd*math.cos(phi))/deno) 
 
-    deno = x[1]+rd*math.sin(phi)
+#    deno = x[1]+rd*math.sin(phi)
     #protect from zero divide
-    if deno < 1.e-20:
-        deno = 1.e-20
-    ATan1 = math.atan((y[1]-rd*math.cos(phi))/deno)
-    if x[0] < -rd*math.sin(phi):
-        ATan0 += math.pi
-        if x[1] < -rd*math.sin(phi):
-            ATan1 += math.pi
-        elif ATan1 < 0:
-            ATan1 += 2*math.pi
-    elif ATan0 < 0:
-        ATan0 += 2*math.pi
-        if x[1] < -rd*math.sin(phi):
-            ATan1 += math.pi
-        else:
-            ATan1 += 2*math.pi
-    else:
-        if x[1] < -rd*math.sin(phi):
-            ATan1 += math.pi
-        elif ATan1 < 0:
-            ATan1 += 2*math.sin(phi)
-            ATan0 += 2*math.sin(phi)
+#    if deno == 0:
+#        deno = 1.e-20
+#    ATan1 = math.atan((y[1]-rd*math.cos(phi))/deno)
+#    if x[0] < -rd*math.sin(phi):
+#        ATan0 += math.pi
+#        if x[1] < -rd*math.sin(phi):
+#            ATan1 += math.pi
+#        elif ATan1 < 0:
+#            ATan1 += 2*math.pi
+#    elif ATan0 < 0:
+#        ATan0 += 2*math.pi
+#        if x[1] < -rd*math.sin(phi):
+#            ATan1 += math.pi
+#        else:
+#            ATan1 += 2*math.pi
+#    else:
+#        if x[1] < -rd*math.sin(phi):
+#            ATan1 += math.pi
+#        elif ATan1 < 0:
+#            ATan1 += 2*math.pi
+#            ATan0 += 2*math.pi
 
-    q = 1
-    if ATan1 < ATan0:
-        q = -1
+#    q = 1
+#    if ATan1 < ATan0:
+#        q = -1
     
     #z is not used
     #ASin1 = calcurate_asin(math.arcsin((y[1] - rd*math.cos(phi))*u), q, x[1], -rd*math.sin(phi))
@@ -88,44 +88,80 @@ def get_1uDp(x,y):
     #eta = q * sqrt(rr) * (ASin1 - ASin0) / (z[1] - z[0])
     #nanika = z[0] - q * math.sqrt(rr) * (ASin0 - phi + math.pi/2)/eta
     
-    u *= q
-    D *= q
-    if q < 0:
-        if phi > math.pi:
-            phi -= math.pi
-        else:
-            phi += math.pi
+#    u *= q
+#    D *= q
+#    if q < 0:
+#        if phi > math.pi:
+#            phi -= math.pi
+#        else:
+#            phi += math.pi
     #eta *= q
 
-    return (u, D, phi)
+#    return (u, D, phi)
 
 def get_uDp(x):
     #assume x = array([[[x1,y1],[x2,y2],[x3,y3]],[],...])
     #return array([[u,v,w],[],...])
-    if (x.shape[1] !=3) or (x.shape[2] != 2):
+    if x.shape[2] != 2:
         return np.zeros(3)
-    r2 = (x*x).sum(axis=2)
-    r2_dif = np.array([r2[:,1] - r2[:,2],r2[:,2] - r2[:,0], r2[:,0] - r2[:,1]]).transpose()
-    phi = np.arctan((x[:,:,1] * r2_dif).sum(axis=1)/(x[:,:,0] * r2_dif).sum(axis=1))
+
+    sumx = np.sum(x,axis=1)
+    sumx2 = np.sum(x**2,axis=1)
+    sumxy = np.sum(x[:,:,0]*x[:,:,1],axis=1)
+
+    #F = np.array([np.array([sumx2[:,0],sumxy,sumx[:,0]]).transpose(),
+    #              np.array([sumxy,sumx2[:,1],sumx[:,1]]).transpose(),
+    #              np.array([sumx[:,0], sumx[:,1], np.ones(x.shape[0])*x.shape[1]]).transpose()])
+    F = np.array([np.array([sumx2[:,0],sumxy,sumx[:,0]]),
+                  np.array([sumxy,sumx2[:,1],sumx[:,1]]),
+                  np.array([sumx[:,0], sumx[:,1], np.ones(x.shape[0])*x.shape[1]])]).transpose()
+    #G = np.array([np.array([-np.sum(x[:,0]**3 + x[:,1]**3,axis=1)]).transpose(),
+    #              np.array([-np.sum(x[:,0]**2 * x[:,1] + x[:,1]**3,axis=1)]).transpose(),
+    #              np.array([-np.sum(x[:,0]**2 + x[:,1]**2,axis=1)]).transpose()])
+    G = np.array([-np.sum(x[:,:,0]**3 + x[:,:,0] * (x[:,:,1]**2),axis=1),
+                -np.sum((x[:,:,0]**2) * x[:,:,1] + x[:,:,1]**3,axis=1),
+                -np.sum(x[:,:,0]**2 + x[:,:,1]**2,axis=1)]).transpose()
+    #G = np.array([[-sum([ix ** 3 + ix*iy **2 for (ix,iy) in zip(x,y)])],
+    #              [-sum([ix **2 *iy + iy **3 for (ix,iy) in zip(x,y)])],
+    #              [-sum([ix ** 2 + iy **2 for (ix,iy) in zip(x,y)])]])
+
+    #T = np.linalg.inv(F).dot(G)
+    T = np.zeros((x.shape[0],3))
+    for i in range(x.shape[0]):
+        T[i] = np.linalg.inv(F[i]).dot(G[i])
+
+    cxe = -T[:,0]/2
+    cye = -T[:,1]/2
+    re = np.sqrt(cxe**2 + cye**2 - T[:,2])
+    u = 1./re
+    D = np.sqrt(cxe**2 + cye**2) - re
+    rd = re - D
+    phi = np.arctan2(-cxe,cye)
     phi[phi<0] += math.pi
+    #print(cxe,cye,re)
 
-    rd = -r2_dif[:,2]/2.0/(np.sin(phi)*(x[:,0,0]-x[:,1,0])-np.cos(phi)*(x[:,0,1]-x[:,1,1]))
-    phi[rd<0] += math.pi
-    rd[rd<0] *= -1
+    #r2 = (x*x).sum(axis=2)
+    #r2_dif = np.array([r2[:,1] - r2[:,2],r2[:,2] - r2[:,0], r2[:,0] - r2[:,1]]).transpose()
+    #phi = np.arctan((x[:,:,1] * r2_dif).sum(axis=1)/(x[:,:,0] * r2_dif).sum(axis=1))
+    #phi[phi<0] += math.pi
 
-    rr = r2[:,0] + 2.0*rd*(np.sin(phi)*x[:,0,0]-np.cos(phi)*x[:,0,1])+rd**2
-    u = 1.0/np.sqrt(rr)
-    D = np.sqrt(rr) - rd
+    #rd = -r2_dif[:,2]/2.0/(np.sin(phi)*(x[:,0,0]-x[:,1,0])-np.cos(phi)*(x[:,0,1]-x[:,1,1]))
+    #phi[rd<0] += math.pi
+    #rd[rd<0] *= -1
 
-    ATan0 = np.arctan((x[:,0,1]-rd*np.cos(phi))/(x[:,0,0]+rd*np.sin(phi))) 
-    ATan1 = np.arctan((x[:,1,1]-rd*np.cos(phi))/(x[:,1,0]+rd*np.sin(phi))) 
+    #rr = r2[:,0] + 2.0*rd*(np.sin(phi)*x[:,0,0]-np.cos(phi)*x[:,0,1])+rd**2
+    #u = 1.0/np.sqrt(rr)
+    #D = np.sqrt(rr) - rd
 
-    con_lv0 = [x[:,0,0] < -rd*np.sin(phi), 
-               ~(x[:,0,0] < -rd*np.sin(phi)) & (ATan0 < 0), 
-               ~(x[:,0,0] < -rd*np.sin(phi)) & ~(ATan0 < 0)]
-    con_lv1 = [x[:,1,0] < -rd*np.sin(phi),
-               ~(x[:,1,0] < -rd*np.sin(phi)) & (ATan1 < 0),
-               ~(x[:,1,0] < -rd*np.sin(phi))]
+    ATan0 = np.arctan((x[:,0,1]-cye)/(x[:,0,0]-cxe)) 
+    ATan1 = np.arctan((x[:,1,1]-cye)/(x[:,1,0]-cxe)) 
+
+    con_lv0 = [x[:,0,0] < cxe, 
+               ~(x[:,0,0] < cxe) & (ATan0 < 0), 
+               ~(x[:,0,0] < cxe) & ~(ATan0 < 0)]
+    con_lv1 = [x[:,1,0] < cxe,
+               ~(x[:,1,0] < cxe) & (ATan1 < 0),
+               ~(x[:,1,0] < cxe)]
     ATan0[con_lv0[0]] += math.pi
     ATan1[con_lv0[0] & con_lv1[0]] += math.pi
     ATan1[con_lv0[0] & con_lv1[1]] += 2*math.pi
@@ -135,30 +171,11 @@ def get_uDp(x):
     ATan1[con_lv0[2] & con_lv1[0]] += math.pi
     ATan1[con_lv0[2] & con_lv1[1]] += 2*math.pi
     ATan0[con_lv0[2] & con_lv1[1]] += 2*math.pi
-    #if x[:,0,0] < -rd*np.sin(phi):
-    #    ATan0 += math.pi
-    #    if x[:,1,0] < -rd*np.sin(phi):
-    #        ATan1 += math.pi
-    #    elif ATan1 < 0:
-    #        ATan1 += 2*math.pi
-    #elif ATan0 < 0:
-    #    ATan0 += 2*math.pi
-    #    if x[:,1,0] < -rd*np.sin(phi):
-    #        ATan1 += math.pi
-    #    else:
-    #        ATan1 += 2*math.pi
-    #else:
-    #    if x[:,1,0] < -rd*np.sin(phi):
-    #        ATan1 += math.pi
-    #    elif ATan1 < 0:
-    #        ATan1 += 2*math.pi
-    #        ATan0 += 2*math.pi
 
     q = np.ones(x.shape[0])
-    q[ATan1<ATan0] = -1
-    #if ATan1 > ATan0:
-    #    q = -1
+    q[ATan1>ATan0] = -1
     
+
     #z is not used
     #ASin1 = calcurate_asin(math.arcsin((y[1] - rd*math.cos(phi))*u), q, x[1], -rd*math.sin(phi))
     #ASin0 = calcurate_asin(math.arcsin((y[0] - rd*math.cos(phi))*u), q, x[0], -rd*math.sin(phi))
@@ -167,6 +184,14 @@ def get_uDp(x):
     
     u *= q
     D *= q
+    #check
+    cos_phi = np.cos(phi)
+    sin_phi = np.sin(phi)
+    ax = -q * (1./u - D)*sin_phi
+    ay = q * (1./u - D)*cos_phi
+    condition = [(phi>math.pi) & ((ax - cxe)**2 + (ay - cye)**2 >1.e2), (phi<math.pi) & ((ax - cxe)**2 + (ay - cye)**2 >1.e2)]
+    phi[condition[0]] -= math.pi
+    phi[condition[1]] += math.pi
 
     condition = [(q<0) & (phi>math.pi), (q<0) & ~(phi>math.pi)]
     phi[condition[0]] -= math.pi
@@ -307,7 +332,16 @@ def invert_state(state):
 
     return state
 
-def get_1uDp_byfit(x,y):
+def rotate_state(state):
+    phi = state[:,2]
+    condition = [phi>math.pi, ~(phi>math.pi)]
+    phi[condition[0]] -= math.pi
+    phi[condition[1]] += math.pi
+    state[:,2] = phi
+
+    return state
+
+def get_1uDp(x,y):
     sumx = sum(x)
     sumy = sum(y)
     sumx2 = sum([ix ** 2 for ix in x])
@@ -327,48 +361,71 @@ def get_1uDp_byfit(x,y):
     cye = float(T[1]/-2)
     re = math.sqrt(cxe**2 + cye**2 - T[2])
 
+    #if re < 200:
+        #assume passing (0,0)
+    #    xp = np.append(x,0)
+    #    yp = np.append(y,0)
+    #    cxe, cye, re = fit_circle(xp, yp)
+
+    #print(cxe, cye, re)
+
     u = 1./re
-    D = re - np.sqrt(cxe**2 + cye**2)
-    phi = np.arctan(-cxe/cye)
+    D = np.sqrt(cxe**2 + cye**2) - re
+    #if D**2 > re**2:
+    #    D -= 2*re
+    phi = np.arctan2(-cxe,cye)
     if phi < 0:
         phi += math.pi
 
     deno = x[0]-cxe
     #protect from zero divide
-    if deno < 1.e-20:
+    if deno == 0:
         deno = 1.e-20
     ATan0 = math.atan((y[0]-cye)/deno) 
 
-    deno = x[1]-cxe
+    deno = x[2]-cxe
     #protect from zero divide
-    if deno < 1.e-20:
+    if deno == 0:
         deno = 1.e-20
-    ATan1 = math.atan((y[1]-cye)/deno)
+    ATan1 = math.atan((y[2]-cye)/deno)
     if x[0] < cxe:
         ATan0 += math.pi
-        if x[1] < cxe:
+        if x[2] < cxe:
             ATan1 += math.pi
         elif ATan1 < 0:
             ATan1 += 2*math.pi
     elif ATan0 < 0:
         ATan0 += 2*math.pi
-        if x[1] < cxe:
+        if x[2] < cxe:
             ATan1 += math.pi
         else:
             ATan1 += 2*math.pi
     else:
-        if x[1] < cxe:
+        if x[2] < cxe:
             ATan1 += math.pi
         elif ATan1 < 0:
-            ATan1 += 2*math.sin(phi)
-            ATan0 += 2*math.sin(phi)
+            ATan1 += 2*math.pi
+            ATan0 += 2*math.pi
 
     q = 1
-    if ATan1 < ATan0:
+    if ATan1 > ATan0:
         q = -1
-    
+
     u *= q
     D *= q
+
+    #check
+    cos_phi = np.cos(phi)
+    sin_phi = np.sin(phi)
+    ax = -q * (1./u - D)*sin_phi
+    ay = q * (1./u - D)*cos_phi
+    if (ax - cxe)**2 + (ay - cye)**2 >1.e2:
+        if phi > math.pi:
+            phi -= math.pi
+        else:
+            phi += math.pi
+
+    
     if q < 0:
         if phi > math.pi:
             phi -= math.pi

@@ -40,6 +40,16 @@ class KalmanFilter:
             invert = chi**2 > (obsrv - tmp_predict_obsrv)**2
             self.predict_obsrv[invert] = tmp_predict_obsrv[invert]
             self.predict_state[invert] = tmp_predict_state[invert]
+            chi = obsrv - self.predict_obsrv
+
+            #rotate_state = tr_ut.rotate_state(tracks.get_state())
+            #for i in range(ndim):
+                #state prediction
+            #    tmp_predict_state[:,i] = np.sum(state_trans[:,i] * rotate_state, axis=1) + state_trans_control[:,i]
+            #tmp_predict_obsrv = tr_ut.get_predict_obsrv(tmp_predict_state,module_trans)[:,0]
+            #rotate = chi**2 > (obsrv - tmp_predict_obsrv)**2
+            #self.predict_obsrv[rotate] = tmp_predict_obsrv[rotate]
+            #self.predict_state[rotate] = tmp_predict_state[rotate]
 
         tracks.set_state(self.predict_state)
         chi = obsrv - self.predict_obsrv
