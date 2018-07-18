@@ -125,10 +125,11 @@ def get_uDp(x):
     #              [-sum([ix **2 *iy + iy **3 for (ix,iy) in zip(x,y)])],
     #              [-sum([ix ** 2 + iy **2 for (ix,iy) in zip(x,y)])]])
 
-    #T = np.linalg.inv(F).dot(G)
+    invF = np.linalg.inv(F)
     T = np.zeros((x.shape[0],3))
-    for i in range(x.shape[0]):
-        T[i] = np.linalg.inv(F[i]).dot(G[i])
+    for i in range(3):
+        T[i] = np.sum(invF[:,i]*G,axis=1)
+
 
     cxe = -T[:,0]/2
     cye = -T[:,1]/2
