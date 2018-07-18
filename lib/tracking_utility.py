@@ -128,7 +128,7 @@ def get_uDp(x):
     invF = np.linalg.inv(F)
     T = np.zeros((x.shape[0],3))
     for i in range(3):
-        T[i] = np.sum(invF[:,i]*G,axis=1)
+        T[:,i] = np.sum(invF[:,i]*G,axis=1)
 
 
     cxe = -T[:,0]/2
