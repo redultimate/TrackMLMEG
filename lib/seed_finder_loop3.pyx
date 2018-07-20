@@ -40,6 +40,7 @@ class SeedFinder(object):
         cdef np.ndarray[double, ndim=2] HitIDmodule1_2_3n 
         cdef np.ndarray[double, ndim=3] aXYmodule3, aXYmodule1_2, aXYmodule2_3, XYmodule2_3, XYmodule1_2_3
         cdef np.ndarray[double, ndim=3] aHitIDmodule3, aHitIDmodule1_2, aHitIDmodule2_3, HitIDmodule2_3, HitIDmodule1_2_3
+        cdef np.ndarray[double, ndim=2] track_parameter, track_parameters
         t1 = time.time()
         #hits = hits_df.loc[:, ['hit_id','x','y', 'volume_id', 'layer_id', 'module_id', 'particle_id', 'weight']].values 
         mask_17_4 = ((hits[:, 3] == 17) & (hits[:, 4] == 4))
@@ -56,15 +57,14 @@ class SeedFinder(object):
         mid_lookup_17_2_to_13_8 = pkl.load(f)
 
         #if self.debug:
-        nhits1st = self.debug
+        #nhits1st = self.debug
         #else:
-        #nhits1st = len(hits_17_4)
+        nhits1st = len(hits_17_4)
 
         # index in the 1st layer, all the hits in the 1st layer
-        #for id1st in range(nhits1st):
-        
-        for id1st0 in range(nhits1st):
-            id1st = int(2600+id1st0)
+        for id1st in range(nhits1st):
+        #for id1st0 in range(nhits1st):
+            #id1st = int(2600+id1st0)
             print(id1st)
             # module id in the 1st outer layer (volume17, layer4 in this case)
             mid1st = int(hits_17_4[id1st, 5])
@@ -74,16 +74,16 @@ class SeedFinder(object):
             #    print("module ", mid1st, "in the 1st layer")
             #    print("(1st layer) [x, y] = ", hits_17_4.loc[:, ['x', 'y']].values[id1st])
             #    print("(1st layer) hitid = ", hits_17_4.loc[:, ['hit_id']].values[id1st])
-            print("true particle_id: ", true_particle_id)
+            #print("true particle_id: ", true_particle_id)
             # get module id in the 2nd layer which corresponds to the module in the 1st layer according to the look-up table
             # mid1st-1 because module id is start from 1 not 0
             mask2nd = np.isin(hits_17_2[:, 5], mid_lookup_17_4_to_17_2[mid1st-1])
             hits_17_2_selected = hits_17_2[mask2nd]
 
             #if self.debug:
-            nhits2nd = self.debug
+            #nhits2nd = self.debug
             #else:
-            #nhits2nd = len(hits_17_2_selected)
+            nhits2nd = len(hits_17_2_selected)
             # loop for 2nd layer (volume17, layer2 in this case)
             for id2nd in range(nhits2nd):
                 mid2nd = int(hits_17_2_selected[id2nd, 5])
@@ -91,7 +91,7 @@ class SeedFinder(object):
                 #if self.debug:
                 #    print("------------------------------")
                 #    print(id2nd, "th hit in the 2nd layer")
-                print("module ", mid2nd, "in the 2nd layer")
+                #print("module ", mid2nd, "in the 2nd layer")
                 #    print(hits_17_2_selected.loc[:, ['x', 'y']].values[id2nd])
                 #    print(hits_17_2_selected.loc[:, ['hit_id']].values[id2nd])
 
@@ -153,6 +153,22 @@ class SeedFinder(object):
             #true_combination = np.array([[true_track[mask_17_4_true].loc[:, ['x', 'y']].values[0], true_track[mask_17_2_true].loc[:, ['x', 'y']].values[0], true_track[mask_13_8_true].loc[:, ['x', 'y']].values[0]]])
             #true_combination
 
+            u, D, p = get_uDp(XYmodule2_3)
+            mask_cut = abs(D) < self.thre
+            
+            track_parameter = np.r_['1, 2, 0', u[mask_cut], D[mask_cut]]
+            track_parameter = np.r_['1, 2, 0', track_parameter, p[mask_cut]]
+            
+            
+            if id1st == 0:
+                HitIDmodule1_2_3 = HitIDmodule2_3[mask_cut]
+                track_parameters = track_parameter
+
+            else:
+                HitIDmodule1_2_3 = np.concatenate((HitIDmodule1_2_3, HitIDmodule2_3[mask_cut]), axis=0)
+                track_parameters = np.concatenate((track_parameters, track_parameter), axis=0)
+            
+            """
             if id1st == 2600:
                 XYmodule1_2_3 = XYmodule2_3
                 HitIDmodule1_2_3 = HitIDmodule2_3
@@ -160,14 +176,17 @@ class SeedFinder(object):
             else:
                 XYmodule1_2_3 = np.concatenate((XYmodule1_2_3, XYmodule2_3), axis=0)
                 HitIDmodule1_2_3 = np.concatenate((HitIDmodule1_2_3, HitIDmodule2_3), axis=0)
+            """
 
+        """
         t2 = time.time()
         u, D, p = get_uDp(XYmodule1_2_3)
         t3 = time.time()
         mask_cut = abs(D) < self.thre
         t4 = time.time()
-        cdef np.ndarray[double, ndim=2] track_parameter = np.r_['1, 2, 0', u[mask_cut], D[mask_cut]]
-        cdef np.ndarray[double, ndim=2] track_parameters = np.r_['1, 2, 0', track_parameter, p[mask_cut]]
+        track_parameter = np.r_['1, 2, 0', u[mask_cut], D[mask_cut]]
+        track_parameters = np.r_['1, 2, 0', track_parameter, p[mask_cut]]
+        """
         #print(track_parameters.shape[0], " hit combinations pass D cut")
         #print(HitIDmodule1_2_3[mask_cut].shape[0], " hit combinations pass D cut")
 
@@ -177,6 +196,11 @@ class SeedFinder(object):
         #print(HitIDmodule1_2_3n[mask_cut].shape)
         #print(HitIDmodule1_2_3n[mask_cut])
         t5 = time.time()
-        print(t1-t1, t2-t1, t3-t1, t4-t1, t5-t1)
-        return HitIDmodule1_2_3n[mask_cut], track_parameters
+        #print(t1-t1, t2-t1, t3-t1, t4-t1, t5-t1)
+        print(t1-t1, t5-t1)
+        #return HitIDmodule1_2_3n[mask_cut], track_parameters
+        
+        print(track_parameters.shape[0], " hit combinations pass D cut")
+        print(HitIDmodule1_2_3n.shape[0], " hit combinations pass D cut")
+        return HitIDmodule1_2_3n, track_parameters
     
