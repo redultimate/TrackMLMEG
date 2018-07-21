@@ -1,7 +1,9 @@
 import math
 import numpy as np
+from numpy import *
 import detector as det
 import pandas as pd
+#from scipy import optimize
 
 def fit_circle(x,y):
     sumx = sum(x)
@@ -109,21 +111,12 @@ def get_uDp(x):
     sumx2 = np.sum(x**2,axis=1)
     sumxy = np.sum(x[:,:,0]*x[:,:,1],axis=1)
 
-    #F = np.array([np.array([sumx2[:,0],sumxy,sumx[:,0]]).transpose(),
-    #              np.array([sumxy,sumx2[:,1],sumx[:,1]]).transpose(),
-    #              np.array([sumx[:,0], sumx[:,1], np.ones(x.shape[0])*x.shape[1]]).transpose()])
     F = np.array([np.array([sumx2[:,0],sumxy,sumx[:,0]]),
                   np.array([sumxy,sumx2[:,1],sumx[:,1]]),
                   np.array([sumx[:,0], sumx[:,1], np.ones(x.shape[0])*x.shape[1]])]).transpose()
-    #G = np.array([np.array([-np.sum(x[:,0]**3 + x[:,1]**3,axis=1)]).transpose(),
-    #              np.array([-np.sum(x[:,0]**2 * x[:,1] + x[:,1]**3,axis=1)]).transpose(),
-    #              np.array([-np.sum(x[:,0]**2 + x[:,1]**2,axis=1)]).transpose()])
     G = np.array([-np.sum(x[:,:,0]**3 + x[:,:,0] * (x[:,:,1]**2),axis=1),
                 -np.sum((x[:,:,0]**2) * x[:,:,1] + x[:,:,1]**3,axis=1),
                 -np.sum(x[:,:,0]**2 + x[:,:,1]**2,axis=1)]).transpose()
-    #G = np.array([[-sum([ix ** 3 + ix*iy **2 for (ix,iy) in zip(x,y)])],
-    #              [-sum([ix **2 *iy + iy **3 for (ix,iy) in zip(x,y)])],
-    #              [-sum([ix ** 2 + iy **2 for (ix,iy) in zip(x,y)])]])
 
     invF = np.linalg.inv(F)
     T = np.zeros((x.shape[0],3))
@@ -134,9 +127,22 @@ def get_uDp(x):
     cxe = -T[:,0]/2
     cye = -T[:,1]/2
     re = np.sqrt(cxe**2 + cye**2 - T[:,2])
+    #print(cxe, cye, re)
+
+    #r2 = x[:,:,0]**2 + x[:,:,1]**2
+    #deno = 2.*((x[:,0,0] - x[:,1,0])*(x[:,1,1]-x[:,2,1]) - (x[:,1,0] - x[:,2,0])*(x[:,0,1] - x[:,1,1]))
+    #deno[deno==0] = 1.e-20
+    #cxe = (x[:,1,1] - x[:,2,1])*(r2[:,0] - r2[:,1]) - (x[:,0,1] - x[:,1,1])*(r2[:,1] - r2[:,2])
+    #cxe /= deno
+    #cye = (x[:,1,0] - x[:,2,0])*(r2[:,0] - r2[:,1]) - (x[:,0,0] - x[:,1,0])*(r2[:,1] - r2[:,2])
+    #cye /= -deno
+    #ri = np.sqrt((x[:,:,0] - cxe[:,newaxis])**2 + (x[:,:,1] - cye[:,newaxis])**2)
+    #re = np.mean(ri,axis=1)
+    #print(cxe, cye, re)
+    
+
     u = 1./re
-    D = np.sqrt(cxe**2 + cye**2) - re
-    rd = re - D
+    D = re - np.sqrt(cxe**2 + cye**2) 
     phi = np.arctan2(-cxe,cye)
     phi[phi<0] += math.pi
     #print(cxe,cye,re)
@@ -190,7 +196,8 @@ def get_uDp(x):
     sin_phi = np.sin(phi)
     ax = -q * (1./u - D)*sin_phi
     ay = q * (1./u - D)*cos_phi
-    condition = [(phi>math.pi) & ((ax - cxe)**2 + (ay - cye)**2 >1.e2), (phi<math.pi) & ((ax - cxe)**2 + (ay - cye)**2 >1.e2)]
+    #print(ax, ay)
+    condition = [(phi>math.pi) & ((ax - cxe)**2 + (ay - cye)**2 >1.e1), (phi<math.pi) & ((ax - cxe)**2 + (ay - cye)**2 >1.e1)]
     phi[condition[0]] -= math.pi
     phi[condition[1]] += math.pi
 
@@ -371,7 +378,7 @@ def get_1uDp(x,y):
     #print(cxe, cye, re)
 
     u = 1./re
-    D = np.sqrt(cxe**2 + cye**2) - re
+    D = re - np.sqrt(cxe**2 + cye**2)
     #if D**2 > re**2:
     #    D -= 2*re
     phi = np.arctan2(-cxe,cye)
