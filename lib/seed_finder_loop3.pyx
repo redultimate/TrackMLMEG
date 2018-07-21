@@ -7,7 +7,8 @@ import sys
 sys.path.append("../lib/")
 
 # meg library
-from tracking_utility import *
+#from tracking_utility import *
+from tracking_utility_c import *
 
 # see how_to_get_seed_candidates
 # if debug = 1, only 2 hit combinations in each layer will be processed
@@ -168,25 +169,6 @@ class SeedFinder(object):
                 HitIDmodule1_2_3 = np.concatenate((HitIDmodule1_2_3, HitIDmodule2_3[mask_cut]), axis=0)
                 track_parameters = np.concatenate((track_parameters, track_parameter), axis=0)
             
-            """
-            if id1st == 2600:
-                XYmodule1_2_3 = XYmodule2_3
-                HitIDmodule1_2_3 = HitIDmodule2_3
-
-            else:
-                XYmodule1_2_3 = np.concatenate((XYmodule1_2_3, XYmodule2_3), axis=0)
-                HitIDmodule1_2_3 = np.concatenate((HitIDmodule1_2_3, HitIDmodule2_3), axis=0)
-            """
-
-        """
-        t2 = time.time()
-        u, D, p = get_uDp(XYmodule1_2_3)
-        t3 = time.time()
-        mask_cut = abs(D) < self.thre
-        t4 = time.time()
-        track_parameter = np.r_['1, 2, 0', u[mask_cut], D[mask_cut]]
-        track_parameters = np.r_['1, 2, 0', track_parameter, p[mask_cut]]
-        """
         #print(track_parameters.shape[0], " hit combinations pass D cut")
         #print(HitIDmodule1_2_3[mask_cut].shape[0], " hit combinations pass D cut")
 
