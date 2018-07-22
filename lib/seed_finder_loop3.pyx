@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pickle as pkl
-import time
+#import time
 
 import sys
 sys.path.append("../lib/")
@@ -42,7 +42,7 @@ class SeedFinder(object):
         cdef np.ndarray[double, ndim=3] aXYmodule3, aXYmodule1_2, aXYmodule2_3, XYmodule2_3, XYmodule1_2_3
         cdef np.ndarray[double, ndim=3] aHitIDmodule3, aHitIDmodule1_2, aHitIDmodule2_3, HitIDmodule2_3, HitIDmodule1_2_3
         cdef np.ndarray[double, ndim=2] track_parameter, track_parameters
-        t1 = time.time()
+        #t1 = time.time()
         #hits = hits_df.loc[:, ['hit_id','x','y', 'volume_id', 'layer_id', 'module_id', 'particle_id', 'weight']].values 
         mask_17_4 = ((hits[:, 3] == 17) & (hits[:, 4] == 4))
         mask_17_2 = ((hits[:, 3] == 17) & (hits[:, 4] == 2))
@@ -66,10 +66,10 @@ class SeedFinder(object):
         for id1st in range(nhits1st):
         #for id1st0 in range(nhits1st):
             #id1st = int(2600+id1st0)
-            print(id1st)
+            print(str(id1st) + "/" + str(nhits1st))
             # module id in the 1st outer layer (volume17, layer4 in this case)
             mid1st = int(hits_17_4[id1st, 5])
-            true_particle_id = hits_17_4[id1st, 6]
+            #true_particle_id = hits_17_4[id1st, 6]
             #if self.debug:
             #    print(id1st, "th hit in the 1st layer")
             #    print("module ", mid1st, "in the 1st layer")
@@ -177,12 +177,12 @@ class SeedFinder(object):
         HitIDmodule1_2_3n = HitIDmodule1_2_3.reshape(HitIDmodule1_2_3.shape[0], 3)
         #print(HitIDmodule1_2_3n[mask_cut].shape)
         #print(HitIDmodule1_2_3n[mask_cut])
-        t5 = time.time()
+        #t5 = time.time()
         #print(t1-t1, t2-t1, t3-t1, t4-t1, t5-t1)
-        print(t1-t1, t5-t1)
+        #print(t1-t1, t5-t1)
         #return HitIDmodule1_2_3n[mask_cut], track_parameters
         
-        print(track_parameters.shape[0], " hit combinations pass D cut")
-        print(HitIDmodule1_2_3n.shape[0], " hit combinations pass D cut")
+        print(str(track_parameters.shape[0]) + " hit combinations pass D cut")
+        print(str(HitIDmodule1_2_3n.shape[0]) + " hit combinations pass D cut")
         return HitIDmodule1_2_3n, track_parameters
     
