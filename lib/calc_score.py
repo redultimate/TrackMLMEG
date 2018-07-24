@@ -19,7 +19,7 @@ class ScoreCalculator:
       # print(tracks.columns)
 
       # Dummy data for track_id -1.
-      tracks =pd.concat([tracks, pd.DataFrame([[-1,0,0,0,0,0,0,0,False]], columns=tracks.columns)])
+      # tracks =pd.concat([tracks, pd.DataFrame([[-1,0,0,0,0,0,0,0,False]], columns=tracks.columns)])
       hits = pd.merge(hits, tracks[['track_id', 'track_purity_maj', 'track_purity_rec', 'track_good_track', 'major_particle_id']], how='left', on='track_id')
 
       # Fill score for each hit
